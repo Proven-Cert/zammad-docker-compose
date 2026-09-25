@@ -201,11 +201,7 @@ services:
     restart: ${RESTART:-always}
     volumes:
       - postgresql-data:/var/lib/postgresql/data
-      - ./10-create-zammad-role.sh:/docker-entrypoint-initdb.d/10-create-zammad-role.sh:ro
-    configs:
-      - source: postgresql-initdb
-        target: /docker-entrypoint-initdb.d/10-create-zammad-role.sh
-        mode: 0444
+      - ./initdb:/docker-entrypoint-initdb.d:ro
     healthcheck:
       # Connect over TCP as Zammad's own role rather than using pg_isready, which
       #   reports success for an unknown role or database, and would also accept the
@@ -259,30 +255,6 @@ services:
   zammad-websocket:
     <<: *zammad-service
     command: ["zammad-websocket"]
-
-configs:
-  postgresql-initdb:
-    content: |
-      #!/bin/sh
-      set -eu
-      if [ "$${ZAMMAD_DB_USER}" = "$${POSTGRES_USER}" ]; then
-        echo "Zammad DB user must differ from PostgreSQL superuser" >&2
-        exit 1
-      fi
-      case "$${ZAMMAD_DB}" in
-        postgres|template0|template1)
-          echo "Invalid Zammad database name" >&2
-          exit 1
-          ;;
-      esac
-      psql --username "$${POSTGRES_USER}" --dbname postgres \
-        --set ON_ERROR_STOP=1 \
-        --set role="$${ZAMMAD_DB_USER}" \
-        --set pass="$${ZAMMAD_DB_PASS}" \
-        --set db="$${ZAMMAD_DB}" <<'EOSQL'
-      CREATE ROLE :"role" LOGIN PASSWORD :'pass';
-      CREATE DATABASE :"db" OWNER :"role";
-      EOSQL
 
 volumes:
   elasticsearch-data:
