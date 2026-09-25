@@ -204,7 +204,7 @@ services:
     configs:
       - source: postgresql-initdb
         target: /docker-entrypoint-initdb.d/10-create-zammad-role.sh
-        mode: 0555
+        mode: 0444
     healthcheck:
       # Connect over TCP as Zammad's own role rather than using pg_isready, which
       #   reports success for an unknown role or database, and would also accept the
