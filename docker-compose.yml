@@ -154,14 +154,15 @@ services:
       start_period: 10s
       retries: 5
 
-  zammad-nginx:
+    zammad-nginx:
     <<: *zammad-service
     command: ["zammad-nginx"]
     init: false
     expose:
       - "${NGINX_PORT:-8080}"
-    ports:
-      - "${NGINX_EXPOSE_PORT:-8080}:${NGINX_PORT:-8080}"
+    networks:
+      - default
+      - dokploy-network
     depends_on:
       zammad-railsserver:
         condition: service_healthy
