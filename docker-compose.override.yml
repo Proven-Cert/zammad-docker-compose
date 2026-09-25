@@ -1,0 +1,12 @@
+services:
+  zammad-nginx:
+    ports: !reset []
+    expose:
+      - "8080"
+    networks:
+      - default
+      - dokploy-network
+
+networks:
+  dokploy-network:
+    external: true
